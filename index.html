@@ -1,69 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Corazón ❤️</title>
+    <meta charset="UTF-8">
+    <title>Corazón con Música</title>
     <style>
-        body{
-            background:black;
-            margin:0;
-            overflow:hidden;
+        body { background-color: black; margin: 0; overflow: hidden; font-family: sans-serif; }
+        canvas { display: block; }
+        
+        /* Estilo del botón */
+        #musicBtn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(255,0,0,0.5);
+            z-index: 10;
         }
-        canvas{
-            display:block;
-        }
+        #musicBtn:hover { background: #cc0000; }
     </style>
 </head>
 <body>
 
-<audio autoplay loop>
-    <source src="MrsMagic.mp3" type="audio/mpeg">
-</audio>
+    <button id="musicBtn">Reproducir Música 🎵</button>
+    
+    <!-- El archivo debe llamarse exactamente MrsMagic.mp3 en tu repo -->
+    <audio id="bgMusic" src="MrsMagic.mp3" loop></audio>
 
-<canvas id="canvas"></canvas>
+    <canvas id="heartCanvas"></canvas>
 
-<script>
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+    <script>
+        // --- Lógica de la Música ---
+        const btn = document.getElementById('musicBtn');
+        const music = document.getElementById('bgMusic');
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+        btn.addEventListener('click', () => {
+            if (music.paused) {
+                music.play();
+                btn.textContent = "Pausar Música ⏸️";
+            } else {
+                music.pause();
+                btn.textContent = "Reproducir Música 🎵";
+            }
+        });
 
-ctx.strokeStyle = "red";
-ctx.lineWidth = 2;
+        // --- Lógica del Corazón (Animación) ---
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-function heart(t){
-    let x = 15*Math.pow(Math.sin(t),3);
-    let y = 12*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
-    return {
-        x:x*15+canvas.width/2,
-        y:-y*15+canvas.height/2
-    };
-}
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 2;
+        ctx.translate(canvas.width / 2, canvas.height / 2);
 
-let scale = 1;
+        function getHeartPoint(n) {
+            const x = 15 * Math.pow(Math.sin(n), 3);
+            const y = 12 * Math.cos(n) - 5 * Math.cos(2 * n) - 2 * Math.cos(3 * n) - Math.cos(4 * n);
+            return { x: x, y: -y };
+        }
 
-function draw(){
-    ctx.beginPath();
-
-    for(let i=0;i<100;i++){
-        let p = heart(i/15);
-
-        if(i==0)
-            ctx.moveTo(p.x*scale,p.y*scale);
-        else
-            ctx.lineTo(p.x*scale,p.y*scale);
-    }
-
-    ctx.stroke();
-
-    scale += 0.05;
-
-    if(scale < 18)
-        requestAnimationFrame(draw);
-}
-
-draw();
-</script>
-
+        let i = 0, j = 0;
+        function animar() {
+            if (i < 18) {
+                if (j === 0) {
+                    ctx.beginPath();
+                    const p = getHeartPoint(0);
+                    ctx.moveTo(p.x * i, p.y * i);
+                }
+                const p = getHeartPoint(j / 15);
+                ctx.lineTo(p.x * i, p.y * i);
+                ctx.stroke();
+                j++;
+                if (j > 100) { j = 0; i++; }
+                requestAnimationFrame(animar);
+            }
+        }
+        animar();
+    </script>
 </body>
 </html>
